@@ -14,76 +14,78 @@ const query = util.promisify(connection.query).bind(connection)
 
 async function runQueries() {
     try {
-        const query1 = `
+        const allResearchPapersAndTheNumber = `
             SELECT a.author_name, m.author_name AS mentor_name
             FROM authors a
             LEFT JOIN authors m ON a.mentor = m.author_id;
         `
-        const query2 = `
-            SELECT a.author_name, IFNULL(rp.paper_title, 'No Research Paper') AS published_paper_title
-            FROM authors a
-            LEFT JOIN research_papers rp ON a.author_id = rp.author_id;
+        const authorsAndTheirPublished = `
+            SELECT a.*, rp.paper_title
+            FROM authors AS a
+            LEFT JOIN author_paper_relationship AS apr ON a.author_id = apr.author_id
+            LEFT JOIN research_papers AS rp ON apr.paper_id = rp.paper_id;
+
         `
-        const query3 = `
-            SELECT rp.paper_title, COUNT(rp.author_id) AS author_count
-            FROM research_papers rp
+        const allResearchRapersAndTheNumberOfAuthors = `
+            SELECT rp.paper_title, COUNT(apr.author_id) AS num_authors
+            FROM research_papers AS rp
+            LEFT JOIN author_paper_relationship AS apr ON rp.paper_id = apr.paper_id
             GROUP BY rp.paper_id;
         `
-        const query4 = `
-            SELECT COUNT(*) AS total_papers_published
-            FROM research_papers rp
-            INNER JOIN authors a ON rp.author_id = a.author_id
-            WHERE a.gender = 'Female';
+        const sumOfTheResearchPapersPublished = `
+           SELECT SUM(CASE WHEN a.gender = 'Female' THEN 1 ELSE 0 END) AS num_research_papers
+            FROM authors AS a
+            JOIN author_paper_relationship AS apr ON a.author_id = apr.author_id;
         `
-        const query5 = `
+        const averageOfTheH_index = `
             SELECT a.university, AVG(a.h_index) AS average_h_index
             FROM authors a
             GROUP BY a.university;
         `
-        const query6 = `
-            SELECT a.university, COUNT(rp.paper_id) AS total_papers
-            FROM authors a
-            LEFT JOIN research_papers rp ON a.author_id = rp.author_id
+        const sumAuthorsPerUniversity = `
+           SELECT a.university, COUNT(apr.paper_id) AS num_research_papers
+            FROM authors AS a
+            LEFT JOIN author_paper_relationship AS apr ON a.author_id = apr.author_id
             GROUP BY a.university;
         `
-        const query7 = `
+        const minimumAndMaximumOfTheH_index = `
             SELECT a.university, MIN(a.h_index) AS min_h_index, MAX(a.h_index) AS max_h_index
             FROM authors a
             GROUP BY a.university;
         `
 
         console.log("Names of authors and their corresponding mentors:")
-        const results1 = await query(query1)
+        const results1 = await query(allResearchPapersAndTheNumber)
         console.log(results1)
 
         console.log("Authors and their published paper titles:")
-        const results2 = await query(query2)
+        const results2 = await query(authorsAndTheirPublished)
         console.log(results2)
 
         console.log(
             "All research papers and the number of authors that wrote that paper:"
         )
-        const results3 = await query(query3)
+        const results3 = await query(allResearchRapersAndTheNumberOfAuthors)
         console.log(results3)
 
         console.log(
             "Sum of the research papers published by all female authors:"
         )
-        const results4 = await query(query4)
+        const results4 = await query(sumOfTheResearchPapersPublished)
         console.log(results4)
 
         console.log("Average of the h-index of all authors per university:")
-        const results5 = await query(query5)
+        const results5 = await query(averageOfTheH_index)
         console.log(results5)
 
         console.log("Sum of the research papers of the authors per university:")
-        const results6 = await query(query6)
+        const results6 = await query(sumAuthorsPerUniversity)
         console.log(results6)
 
         console.log(
             "Minimum and maximum of the h-index of all authors per university:"
         )
-        const results7 = await query(query7)
+        const results7 = await query(minimumAndMaximumOfTheH_index)
         console.log(results7)
 
         connection.end()

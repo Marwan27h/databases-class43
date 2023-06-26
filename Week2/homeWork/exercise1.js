@@ -14,7 +14,7 @@ const query = util.promisify(connection.query).bind(connection)
 
 async function runQueries() {
     try {
-        const query1 = `
+        const createAuthorsTable = `
             CREATE TABLE IF NOT EXISTS authors (
                 author_id INT PRIMARY KEY,
                 author_name VARCHAR(50),
@@ -25,7 +25,7 @@ async function runQueries() {
             )
         `
 
-        const query2 = `
+        const addedMentorColumn = `
             ALTER TABLE authors
             ADD COLUMN mentor INT,
             ADD CONSTRAINT fk_mentor
@@ -34,11 +34,11 @@ async function runQueries() {
         `
 
         console.log("THE TABLE AUTHORS HAS BEEN CREATED")
-        const result1 = await query(query1)
+        const result1 = await query(createAuthorsTable)
         console.log(result1)
 
         console.log("MENTOR COLUMN HAS BEEN ADDED")
-        const result2 = await query(query2)
+        const result2 = await query(addedMentorColumn)
         console.log(result2)
 
         connection.end()
