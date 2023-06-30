@@ -27,11 +27,12 @@ async function runQueries() {
 
         `
         const allResearchRapersAndTheNumberOfAuthors = `
-            SELECT rp.paper_title, COUNT(apr.author_id) AS num_authors
+         SELECT rp.paper_title, COUNT(DISTINCT CASE WHEN a.gender = 'female' THEN rp.paper_id END) AS num_female_authors
             FROM research_papers AS rp
             LEFT JOIN author_paper_relationship AS apr ON rp.paper_id = apr.paper_id
+            LEFT JOIN authors AS a ON apr.author_id = a.author_id
             GROUP BY rp.paper_id;
-        `
+                    `
         const sumOfTheResearchPapersPublished = `
            SELECT SUM(CASE WHEN a.gender = 'Female' THEN 1 ELSE 0 END) AS num_research_papers
             FROM authors AS a
