@@ -27,15 +27,17 @@ async function runQueries() {
 
         `
         const allResearchRapersAndTheNumberOfAuthors = `
-            SELECT rp.paper_title, COUNT(apr.author_id) AS num_authors
+           SELECT rp.paper_title, COUNT(DISTINCT CASE WHEN a.gender = 'Female' THEN apr.author_id END) AS num_authors
             FROM research_papers AS rp
             LEFT JOIN author_paper_relationship AS apr ON rp.paper_id = apr.paper_id
+            LEFT JOIN authors AS a ON apr.author_id = a.author_id
             GROUP BY rp.paper_id;
         `
         const sumOfTheResearchPapersPublished = `
-           SELECT SUM(CASE WHEN a.gender = 'Female' THEN 1 ELSE 0 END) AS num_research_papers
-            FROM authors AS a
-            JOIN author_paper_relationship AS apr ON a.author_id = apr.author_id;
+          SELECT COUNT(DISTINCT apr.paper_id) AS num_research_papers
+            FROM author_paper_relationship AS apr
+            JOIN authors AS a ON apr.author_id = a.author_id
+            WHERE a.gender = 'Female';
         `
         const averageOfTheH_index = `
             SELECT a.university, AVG(a.h_index) AS average_h_index
