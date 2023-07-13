@@ -1,8 +1,7 @@
-const { MongoClient, ObjectId } = require("mongodb")
+const { MongoClient } = require("mongodb")
 
 const uri =
     "mongodb+srv://user:5743584@cluster0.wxdsytg.mongodb.net/?retryWrites=true&w=majority"
-
 const dbName = "databaseWeek4"
 const collectionName = "population"
 
@@ -20,6 +19,7 @@ const getContinentInfo = async (year, age) => {
                     $match: {
                         Year: year,
                         Age: age,
+                        Country: { $regex: /^[A-Z]+$/ },
                     },
                 },
                 {
